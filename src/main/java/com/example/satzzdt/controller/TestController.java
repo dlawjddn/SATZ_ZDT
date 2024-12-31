@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api")
 public class TestController {
-    @GetMapping
+    @GetMapping("/test")
     public String test() {
         return "on going";
     }
