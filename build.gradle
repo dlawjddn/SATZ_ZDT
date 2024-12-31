@@ -47,7 +47,7 @@ dependencies {
 
 task copyConfiguration(type: Copy) {
 	copy {
-		from './submodule_cicd'
+		from './submodule_zdt'
 		include "*.yml"
 		into './src/main/resources'
 	}
