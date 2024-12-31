@@ -45,6 +45,14 @@ dependencies {
 	annotationProcessor 'org.projectlombok:lombok'
 }
 
+task copyConfiguration(type: Copy) {
+	copy {
+		from './submodule_cicd'
+		include "*.yml"
+		into './src/main/resources'
+	}
+}
+
 tasks.named('test') {
 	useJUnitPlatform()
 }
