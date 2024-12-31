@@ -1,0 +1,63 @@
+services:
+  database:
+    image: mysql:8.0.25
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: dlawjddn
+      MYSQL_DATABASE: zdt_prac
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - dnetwork
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: [ "CMD-SHELL", "mysqladmin ping -h localhost -uroot -pdlawjddn || exit 1" ]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  server:
+    image: dlawjddn/zdt_prac:0.0.1
+    container_name: zdt-prac.blue
+    networks:
+      - dnetwork
+    ports:
+      - "8080:8080"
+    command: ["java", "-Duser.timezone=Asia/Seoul", "-Dspring.profiles.active=dev", "-jar", "/app.jar"]
+    depends_on:
+      database:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/api/test" ]
+      interval: 5s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  nginx:
+    image: nginx:stable-alpine
+    container_name: nginx
+    networks:
+      - dnetwork
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx_conf:/etc/nginx/conf.d  # NGINX 설정 파일 마운트
+      #- /etc/letsencrypt/archive/study-dlawjddn.site/fullchain1.pem:/etc/nginx/ssl/fullchain.pem:ro
+      #- /etc/letsencrypt/archive/study-dlawjddn.site/privkey1.pem:/etc/nginx/ssl/privkey.pem:ro
+
+    command: [ "/bin/sh", "-c", "nginx -t && nginx -g 'daemon off;'" ]
+    depends_on:
+      server:
+        condition: service_healthy
+
+networks:
+  dnetwork:
+    name: dnetwork
+    driver: bridge
+
+volumes:
+  mysql_data:
