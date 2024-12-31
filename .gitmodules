@@ -1,0 +1,3 @@
+[submodule "submodule_zdt"]
+	path = submodule_zdt
+	url = https://github.com/dlawjddn/submodule_zdt.git
