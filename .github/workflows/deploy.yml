@@ -3,10 +3,19 @@ name: build application and push to dockerhub
 on:
   pull_request:
     branches: [ "prod" ]
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - closed
+
+  push:
+    branches: [ "prod" ]  # 병합 후 dev 브랜치로 푸시될 때 CD 실행
 
 jobs:
   build-application:
-    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && github.event.action != 'closed'  # PR이 닫히지 않았을 때 실행
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Check out repository code
@@ -55,8 +64,8 @@ jobs:
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKERHUB_PROD_REPONAME }}:0.0.1
 
   deploy-on-server:
-    needs: [ build-application ]
-    runs-on: ubuntu-latest
+    if: github.event_name == 'push'  # push 이벤트에서만 실행
+    runs-on: ubuntu-24.04
 
     steps:
       - name: executing remote ssh commands using password
