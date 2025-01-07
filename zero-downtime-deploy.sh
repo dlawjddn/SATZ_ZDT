@@ -51,8 +51,12 @@ if [ "$BLUE_HEALTH" = "200" ] && [ "$GREEN_HEALTH" != "200" ]; then
     docker exec $NGINX_CONTAINER sed -i 's|server zdt-prac.blue:8080;|server zdt-prac.green:8080;|' $NGINX_CONF
     echo "Updated Nginx configuration to Green."
 
-    docker exec $NGINX_CONTAINER nginx -t && docker exec $NGINX_CONTAINER nginx -s reload
+    if ! docker exec $NGINX_CONTAINER nginx -t; then
+        echo "Nginx configuration test failed. Aborting..."
+        exit 1
+    fi
 
+    docker exec $NGINX_CONTAINER nginx -s reload
 
     docker stop $BLUE_CONTAINER
     docker rm $BLUE_CONTAINER
@@ -85,7 +89,12 @@ elif [ "$BLUE_HEALTH" != "200" ] && [ "$GREEN_HEALTH" = "200" ]; then
     docker exec $NGINX_CONTAINER sed -i 's|server zdt-prac.green:8080;|server zdt-prac.blue:8080;|' $NGINX_CONF
     echo "Updated Nginx configuration to Blue."
 
-    docker exec $NGINX_CONTAINER nginx -t && docker exec $NGINX_CONTAINER nginx -s reload
+    if ! docker exec $NGINX_CONTAINER nginx -t; then
+        echo "Nginx configuration test failed. Aborting..."
+        exit 1
+    fi
+
+    docker exec $NGINX_CONTAINER nginx -s reload
 
     docker stop $GREEN_CONTAINER
     docker rm $GREEN_CONTAINER
@@ -94,7 +103,12 @@ elif [ "$BLUE_HEALTH" = "200" ] && [ "$GREEN_HEALTH" = "200" ]; then
     echo "Both environments are healthy. Defaulting to Blue."
     docker exec $NGINX_CONTAINER sed -i 's|server zdt-prac.green:8080;|server zdt-prac.blue:8080;|' $NGINX_CONF
 
-    docker exec $NGINX_CONTAINER nginx -t && docker exec $NGINX_CONTAINER nginx -s reload
+    if ! docker exec $NGINX_CONTAINER nginx -t; then
+        echo "Nginx configuration test failed. Aborting..."
+        exit 1
+    fi
+
+    docker exec $NGINX_CONTAINER nginx -s reload
 
     docker stop $GREEN_CONTAINER
     docker rm $GREEN_CONTAINER
